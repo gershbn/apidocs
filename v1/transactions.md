@@ -21,7 +21,9 @@ minId
 
 count
 : _Optional_ Maximum number of transactions to return. The default and maximum value for count is 50.
-* **instrument**: Retrieve transactions for a specific instrument only Default: all 
+
+instrument
+: _Optional_ Retrieve transactions for a specific instrument only. Default: all 
 
 ids
 : _Optional_ A comma separated list of transactions ids to retrieve. Maximum number of ids: 50. No other parameter may be specified with the ids parameter.s
@@ -30,6 +32,7 @@ ids
     curl -X GET "http://api-sandbox.oanda.com/v1/accounts/12345/transactions?instrument=EUR_USD&count=1"
 
 #### Response
+
 
 ###### Header
 
@@ -62,14 +65,78 @@ Link: <http://api-sandbox.oanda.com/v1/accounts/6531071/transactions?count=1&max
 ~~~
 
 ####Response Fields
+
+Transactions returned may be of different types describing an event that happened to the account.
+Transaction of each type contains only relevant sub-set of fields. The following fields are the most common: 
+
+id
+: Transaction ID
+
+accountId
+: Account ID of the user
+
+time
+: Date and time in RFC3339 format (http://www.ietf.org/rfc/rfc3339.txt)
+
 type
-: The type of transaction. Possible return values are FOK_market, IOC_market, market, marketIfTouched, limit, stop, position, interest, balance, fund, margin, margin_alert, profit_loss, api_fee, api_license_fee, wire_fee, fund_fee, account.
+: Possible types are: MARKET_ORDER_CREATE , STOP_ORDER_CREATE, LIMIT_ORDER_CREATE, MARKET_IF_TOUCHED_ORDER_CREATE, ORDER_UPDATE, TRADE_UPDATE, TRADE_CLOSE, ORDER_CANCEL, ORDER_FILLED, STOP_LOSS_FILLED, TAKE_PROFIT_FILLED, TRAILING_STOP_FILLED, MARGIN_CALL_ENTER, MARGIN_CALL_EXIT, MARGIN_CLOSEOUT, MIGRATE_TRADE_OPEN, MIGRATE_TRADE_CLOSE, SET_MARGIN_RATE, TRANSFER_FUNDS, DAILY_INTEREST, FEE
 
-action
-: The action performed. Possible return values are open, close, update, flag_to_close, correct, create, enter, resolve, debit, deposit, credit, withdraw, reset
+instrument
+: An instrument
 
-reason
-: The reason the transaction was executed. Possible return values are cancelled, stop_loss_cancelled, take_profit_cancelled, market_fill_cancelled, correction, user_submitted, expired, stop_loss, take_profit, margin_closeout, market_filled, order_filled, non_sufficient_funds, bounds_violation, transfer, account_migration, prime_brokerage_giveup, trailing_stop, limit_stop_FOK, limit_stop_IOC, merge, flagged_for_closing, bulk_close, account_created, margin_alert_entered, margin_alert_resolved, account_transfer, invalid_units, stop_loss_violation, take_profit_violation, trailing_stop_violation, instrument_halted, account_non_tradable, no_new_position_allowed, and insufficient_liquidity.
+side
+: Direction of the action performed on the account, possible values are: buy, sell
+
+units
+: Amount of units involved 
+
+price
+: Execution or requested price
+
+lowerBound
+: Minimum execution price
+
+upperBound
+: Maximum execution price
+
+takeProfitPrice
+: Price of the Take Profit
+
+stopLossPrice
+: Price of the Stop Loss
+
+trailingStopLossDistance
+: Distance of the Trailing Stop in pips, up to one decimal place
+
+pl
+: Profit and Loss value
+
+interest
+: Interest accrued
+
+accountBalance
+: Balance on the account after the event
+
+####Description of transaction types and a sub-set of corresponding fields
+
+#####MARKET_ORDER_CREATE
+A transaction of this type created when a user has successfully traded a specified number of units of an instrument at the current market price.
+
+Required Fields
+: id, accountId, time, type, instrument, side, units, price, pl, interest, accountBalance
+
+Optional Fields
+: lowerBound, upperBound, takeProfitPrice, stopLossPrice, trailingStopLossDistance
+
+######Trade information
+Transaction of a MARKET_ORDER_CREATE type also contains information about associated trade
+
+tradeOpened
+: This object is appended to the json response if a new trade has been opened. Trade related fields are: id, units
+
+tradeReduced
+: This object is appended to the json response if a trade has been closed or reduced. Trade related fields are: id, units, pl, interest
+
 
 ####Pagination
 
