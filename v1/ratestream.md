@@ -31,6 +31,14 @@ Instruments
 
 #### Response
 
+#####Header
+
+~~~Header
+Transfer-Encoding: chunked
+~~~
+
+#####Body (Stream)
+
 All data written to the stream are encoded in the JSON format.
 The initial data returned are price snapshots of the subscribed instruments.  Subsequent price data will be written to the stream whenever new prices are avaliable.
 Heartbeats are written to the stream at set intervals to ensure the HTTP connection remains active.
@@ -45,7 +53,7 @@ Heartbeats are written to the stream at set intervals to ensure the HTTP connect
 ~~~
 
 
-##### JSON Response Fields
+###### JSON Response Fields
 
 instrument
 : Name of the instrument.
