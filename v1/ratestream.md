@@ -2,67 +2,59 @@
 title: Streaming | OANDA API
 ---
 
-# Streaming Endpoints
+# Streaming
+
+As part of our Open API offering, we provide real time data streaming connections for customers that require an alternative to the OANDA REST API.  
+
+The streaming API adheres to the chunked transfer encoding data transfer mechanism of HTTP 1.1.  All streaming connections are authenticated.
 
 * TOC
 {:toc}
 
-## Get rate stream
+## Rates Streaming
 
-Return a chunked Transfer-Encoding stream of OANDA currency rates for instruments that the account has subscribed to with a valid Oauth access token. The connection will be kept alive.
+Open a streaming connection to receive real time market prices for specified instruments.
 
     GET /v1/ratestream
 
 #### Input Query Parameters
 
 accountId
-: _Required_ The account id to fetch the list of tradeable instruments for.
+: _Required_ The account that prices are applicable for.
 
 Instruments
-: _Required_ A (URL encoded) comma separated list of instruments that are to be returned in the response.
+: _Required_ A (URL encoded) comma separated list of instruments to fetch prices for.  
               At least one and at most ten instrument(s) has(have) to be specified.
 
-#### HTTP Header (Authorization)
-
-Access Token
-: _Required_ The access token to verify that the associated accountId has been authorized.
-
 #### Example
-    curl -H "Authorization: Bearer ACCESS_TOKEN" "http://api-sandbox.oanda.com/v1/ratestream?accountId=12345&instrument=AUD_CAD%2CAUD_CHF"
+    curl -H "Authorization: Bearer ACCESS-TOKEN" "http://fxtrade-api.oanda.com/v1/ratestream?accountId=12345&instrument=AUD_CAD%2CAUD_CHF"
 
-#### Response (Rate)
+#### Response
+
+All data written to the stream are encoded in the JSON format.
+The initial data returned are price snapshots of the subscribed instruments.  Subsequent price data will be written to the stream whenever new prices are avaliable.
+Heartbeats are written to the stream at set intervals to ensure the HTTP connection remains active.
 
 ~~~json
 {"instrument":"AUD_CAD","time":"2014-01-30T20:47:08.066398Z","bid":0.98114,"ask":0.98139}
 {"instrument":"AUD_CHF","time":"2014-01-30T20:47:08.053811Z","bid":0.79353,"ask":0.79382}
+{"instrument":"AUD_CHF","time":"2014-01-30T20:47:11.493511Z","bid":0.79355,"ask":0.79387}
+{"Heartbeat":{"time":"2014-01-30T20:47:11.543511Z"}}
+{"instrument":"AUD_CHF","time":"2014-01-30T20:47:11.855887Z","bid":0.79357,"ask":0.79390}
+{"instrument":"AUD_CAD","time":"2014-01-30T20:47:14.066398Z","bid":0.98112,"ask":0.98138}
 ~~~
 
 
-#### Response (Rate) Parameters
+##### JSON Response Fields
 
 instrument
 : Name of the instrument.
 
 time
-: UTC date and time of the currency rate.
+: Time in RFC3339 format
 
 bid
-: The lastest price which clients sell the instrument to OANDA.
+: Bid price
 
 ask
-: The lastest price which clients buy the instrument from OANDA.
-
-status
-: The status of the rate stream.
-
-#### Response (Heartbeat)
-
-~~~json
-{"Heartbeat":{"timestamp":"2014-01-30T20:47:10.389424Z"}}
-~~~
-
-
-#### Response (Heartbeat) Parameters
-
-Heartbeat
-: The server keeps connection alive by sending out a pulse frequently. Heartbeat will only contain date and time information.
+: Ask price
